@@ -11,6 +11,10 @@ from loguru import logger
 from pydantic import field_validator, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from dotenv import load_dotenv, find_dotenv
+
+_ = load_dotenv(find_dotenv())
+
 # BASE_COMPONENTS_PATH = str(Path(__file__).parent / "components")
 BASE_COMPONENTS_PATH = str(Path(__file__).parent.parent.parent / "components")
 
