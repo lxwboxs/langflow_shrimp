@@ -7,7 +7,7 @@ from langflow.utils.constants import LOADERS_INFO
 
 class SimpleDirectoryReaderComponent(CustomComponent):
     # output_types: list[str] = ["Document"]
-    display_name: str = "SimpleDirectoryReader Loader"
+    display_name: str = "FirstSimpleDirectoryReader Loader"
     description: str = "Generic SimpleDirectoryReader Loader"
     beta = True
 

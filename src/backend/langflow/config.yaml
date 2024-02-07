@@ -95,6 +95,7 @@ documentloaders:
     documentation: "https://python.langchain.com/docs/modules/data_connection/document_loaders/how_to/file_directory"
   GitLoader:
     documentation: "https://python.langchain.com/docs/modules/data_connection/document_loaders/integrations/git"
+#aallamahub_document:
 embeddings:
   OpenAIEmbeddings:
     documentation: "https://python.langchain.com/docs/modules/data_connection/text_embedding/integrations/openai"

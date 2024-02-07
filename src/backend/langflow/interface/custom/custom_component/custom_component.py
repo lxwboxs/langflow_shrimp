@@ -167,7 +167,7 @@ class CustomComponent(Component):
             return credential_service.list_credentials(user_id=self._user_id, session=session)
 
     def index(self, value: int = 0):
-        """Returns a function that returns the value at the given index in the iterable."""
+        """Returns a function that returns the value at the given aallamahub_document in the iterable."""
 
         def get_index(iterable: List[Any]):
             return iterable[value] if iterable else iterable

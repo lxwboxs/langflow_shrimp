@@ -65,6 +65,7 @@ export default function ParameterComponent({
   showNode,
   index = "",
 }: ParameterComponentType): JSX.Element {
+  console.log("1111left = :", tooltipTitle);
   const ref = useRef<HTMLDivElement>(null);
   const refHtml = useRef<HTMLDivElement & ReactNode>(null);
   const infoHtml = useRef<HTMLDivElement & ReactNode>(null);
@@ -213,8 +214,14 @@ export default function ParameterComponent({
   }, [info]);
 
   function renderTooltips() {
+    console.log("1111myData = :", myData);
+    console.log("2222tooltipTitle = :", tooltipTitle);
+    console.log("3333left = :", left);
+    console.log("4444flow = :", flow);
     let groupedObj: any = groupByFamily(myData, tooltipTitle!, left, flow!);
     groupedEdge.current = groupedObj;
+    // console.log("groupedObj");
+    console.log("groupedObj = :", groupedObj);
 
     if (groupedObj && groupedObj.length > 0) {
       //@ts-ignore
