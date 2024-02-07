@@ -13,7 +13,7 @@ import {
   tweakType,
 } from "../types/components";
 import { FlowType, NodeType } from "../types/flow";
-import { FlowsState } from "../types/tabs";
+import { FlowState, FlowsState } from "../types/tabs";
 import { buildTweaks } from "./reactflowUtils";
 
 export function classNames(...classes: Array<string>): string {
@@ -160,8 +160,6 @@ export function groupByFamily(
       });
     }
   }
-  console.log("5555baseClassesSet = :", baseClassesSet);
-  console.log("6666checkedNodes = :", checkedNodes);
 
   for (const [d, nodes] of Object.entries(data)) {
     let tempInputs: nodeGroupedObjType[] = [],
@@ -181,7 +179,6 @@ export function groupByFamily(
           displayName: node?.display_name,
         };
       }
-      // console.log("foundNode = :", foundNode);
 
       if (foundNode.hasBaseClassInTemplate)
         tempInputs.push({ node: n, displayName: foundNode.displayName });
@@ -203,34 +200,28 @@ export function groupByFamily(
         nodes: tempOutputs,
         full: tempOutputs.length === totalNodes,
       });
-
   }
-
-  console.log("7777arrOfPossibleInputs = :", arrOfPossibleInputs);
-  console.log("8888arrOfPossibleOutputs = :", arrOfPossibleOutputs);
 
   return left
     ? arrOfPossibleOutputs.map((output) => ({
-      family: output.category,
-      type: output.full
-        ? ""
-        : output.nodes.map((item) => item.node).join(", "),
-      display_name: "",
-    }))
+        family: output.category,
+        type: output.full
+          ? ""
+          : output.nodes.map((item) => item.node).join(", "),
+        display_name: "",
+      }))
     : arrOfPossibleInputs.map((input) => ({
-      family: input.category,
-      type: input.full ? "" : input.nodes.map((item) => item.node).join(", "),
-      display_name: input.nodes.map((item) => item.displayName).join(", "),
-    }));
+        family: input.category,
+        type: input.full ? "" : input.nodes.map((item) => item.node).join(", "),
+        display_name: input.nodes.map((item) => item.displayName).join(", "),
+      }));
 }
 
-export function buildInputs(tabsState: FlowsState, id: string): string {
-  return tabsState &&
-    tabsState[id] &&
-    tabsState[id].formKeysData &&
-    tabsState[id].formKeysData.input_keys &&
-    Object.keys(tabsState[id].formKeysData.input_keys!).length > 0
-    ? JSON.stringify(tabsState[id].formKeysData.input_keys)
+export function buildInputs(flowState?: FlowState): string {
+  return flowState &&
+    flowState.input_keys &&
+    Object.keys(flowState.input_keys!).length > 0
+    ? JSON.stringify(flowState.input_keys)
     : '{"input": "message"}';
 }
 
@@ -291,7 +282,7 @@ export function buildTweakObject(tweak: tweakType) {
       for (let kp in el[key]) {
         try {
           el[key][kp] = JSON.parse(el[key][kp]);
-        } catch { }
+        } catch {}
       }
     });
   });
@@ -305,18 +296,11 @@ export function buildTweakObject(tweak: tweakType) {
  * @param {FlowsState} tabsState - The current tabs state.
  * @returns {string} - The chat input field
  */
-export function getChatInputField(flow: FlowType, tabsState?: FlowsState) {
+export function getChatInputField(flow: FlowType, flowState?: FlowState) {
   let chat_input_field = "text";
 
-  if (
-    tabsState &&
-    tabsState[flow.id] &&
-    tabsState[flow.id].formKeysData &&
-    tabsState[flow.id].formKeysData.input_keys
-  ) {
-    chat_input_field = Object.keys(
-      tabsState[flow.id].formKeysData.input_keys!
-    )[0];
+  if (flowState && flowState.input_keys) {
+    chat_input_field = Object.keys(flowState.input_keys!)[0];
   }
   return chat_input_field;
 }
@@ -330,7 +314,7 @@ export function getPythonApiCode(
   flow: FlowType,
   isAuth: boolean,
   tweak?: any[],
-  tabsState?: FlowsState
+  flowState?: FlowState
 ): string {
   const flowId = flow.id;
 
@@ -339,22 +323,25 @@ export function getPythonApiCode(
   //   node.data.id
   // }
   const tweaks = buildTweaks(flow);
-  const inputs = buildInputs(tabsState!, flow.id);
+  const inputs = buildInputs(flowState);
   return `import requests
 from typing import Optional
 
-BASE_API_URL = "${window.location.protocol}//${window.location.host
-    }/api/v1/process"
+BASE_API_URL = "${window.location.protocol}//${
+    window.location.host
+  }/api/v1/process"
 FLOW_ID = "${flowId}"
 # You can tweak the flow by adding a tweaks dictionary
 # e.g {"OpenAI-XXXXX": {"model_name": "gpt-4"}}
-TWEAKS = ${tweak && tweak.length > 0
+TWEAKS = ${
+    tweak && tweak.length > 0
       ? buildTweakObject(tweak)
       : JSON.stringify(tweaks, null, 2)
-    }
+  }
 
-def run_flow(inputs: dict, flow_id: str, tweaks: Optional[dict] = None${!isAuth ? `, api_key: Optional[str] = None` : ""
-    }) -> dict:
+def run_flow(inputs: dict, flow_id: str, tweaks: Optional[dict] = None${
+    !isAuth ? `, api_key: Optional[str] = None` : ""
+  }) -> dict:
     """
     Run a flow with a given message and optional tweaks.
 
@@ -377,8 +364,9 @@ def run_flow(inputs: dict, flow_id: str, tweaks: Optional[dict] = None${!isAuth 
 # Setup any tweaks you want to apply to the flow
 inputs = ${inputs}
 ${!isAuth ? `api_key = "<your api key>"` : ""}
-print(run_flow(inputs, flow_id=FLOW_ID, tweaks=TWEAKS${!isAuth ? `, api_key=api_key` : ""
-    }))`;
+print(run_flow(inputs, flow_id=FLOW_ID, tweaks=TWEAKS${
+    !isAuth ? `, api_key=api_key` : ""
+  }))`;
 }
 
 /**
@@ -390,21 +378,24 @@ export function getCurlCode(
   flow: FlowType,
   isAuth: boolean,
   tweak?: any[],
-  tabsState?: FlowsState
+  flowState?: FlowState
 ): string {
   const flowId = flow.id;
   const tweaks = buildTweaks(flow);
-  const inputs = buildInputs(tabsState!, flow.id);
+  const inputs = buildInputs(flowState);
 
   return `curl -X POST \\
-  ${window.location.protocol}//${window.location.host
-    }/api/v1/process/${flowId} \\
-  -H 'Content-Type: application/json'\\${!isAuth ? `\n  -H 'x-api-key: <your api key>'\\` : ""
-    }
-  -d '{"inputs": ${inputs}, "tweaks": ${tweak && tweak.length > 0
+  ${window.location.protocol}//${
+    window.location.host
+  }/api/v1/process/${flowId} \\
+  -H 'Content-Type: application/json'\\${
+    !isAuth ? `\n  -H 'x-api-key: <your api key>'\\` : ""
+  }
+  -d '{"inputs": ${inputs}, "tweaks": ${
+    tweak && tweak.length > 0
       ? buildTweakObject(tweak)
       : JSON.stringify(tweaks, null, 2)
-    }}'`;
+  }}'`;
 }
 
 /**
@@ -415,16 +406,17 @@ export function getCurlCode(
 export function getPythonCode(
   flow: FlowType,
   tweak?: any[],
-  tabsState?: FlowsState
+  flowState?: FlowState
 ): string {
   const flowName = flow.name;
   const tweaks = buildTweaks(flow);
-  const inputs = buildInputs(tabsState!, flow.id);
+  const inputs = buildInputs(flowState);
   return `from langflow import load_flow_from_json
-TWEAKS = ${tweak && tweak.length > 0
+TWEAKS = ${
+    tweak && tweak.length > 0
       ? buildTweakObject(tweak)
       : JSON.stringify(tweaks, null, 2)
-    }
+  }
 flow = load_flow_from_json("${flowName}.json", tweaks=TWEAKS)
 # Now you can use it like any chain
 inputs = ${inputs}
@@ -439,12 +431,12 @@ flow(inputs)`;
 export function getWidgetCode(
   flow: FlowType,
   isAuth: boolean,
-  tabsState?: FlowsState
+  flowState?: FlowState
 ): string {
   const flowId = flow.id;
   const flowName = flow.name;
-  const inputs = buildInputs(tabsState!, flow.id);
-  let chat_input_field = getChatInputField(flow, tabsState);
+  const inputs = buildInputs(flowState);
+  let chat_input_field = getChatInputField(flow, flowState);
 
   return `<script src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@main/dist/build/static/js/bundle.min.js"></script>
 
@@ -454,16 +446,18 @@ chat_input_field: Input key that you want the chat to send the user message with
 <langflow-chat
   window_title="${flowName}"
   flow_id="${flowId}"
-  ${tabsState![flow.id] && tabsState![flow.id].formKeysData
+  ${
+    flowState
       ? `chat_inputs='${inputs}'
   chat_input_field="${chat_input_field}"
   `
       : ""
-    }host_url="http://localhost:7860"${!isAuth
+  }host_url="http://localhost:7860"${
+    !isAuth
       ? `
   api_key="..."`
       : ""
-    }
+  }
 
 ></langflow-chat>`;
 }
@@ -648,6 +642,6 @@ export function getFieldTitle(
   return template[templateField].display_name
     ? template[templateField].display_name!
     : template[templateField].name
-      ? toTitleCase(template[templateField].name!)
-      : toTitleCase(templateField);
+    ? toTitleCase(template[templateField].name!)
+    : toTitleCase(templateField);
 }
