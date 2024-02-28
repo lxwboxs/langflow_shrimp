@@ -65,6 +65,8 @@ def build_custom_component_list_from_path(path: str):
     valid_components, invalid_components = build_and_validate_all_files(reader, file_list)
 
     valid_menu = build_valid_menu(valid_components)
+    print("============")
+    print(valid_menu)
     invalid_menu = build_invalid_menu(invalid_components)
 
     return merge_nested_dicts_with_renaming(valid_menu, invalid_menu)

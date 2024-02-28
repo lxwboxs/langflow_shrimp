@@ -19,9 +19,11 @@ class ProxyOpenAIChatEndpointComponent(CustomComponent):
             "model_name": {
                 "display_name": "Model Name",
                 "options": [
+                    "gpt-4-0125-preview",
                     "gpt-4-1106-preview",
                     "gpt-4",
-                    "gpt-3.5-turbo-1125",
+                    "gpt-3.5-turbo-0125",
+                    "gpt-3.5-turbo-1106",
                 ],
                 "info": "https://python.langchain.com/docs/integrations/chat/baidu_qianfan_endpoint",
                 "required": True,

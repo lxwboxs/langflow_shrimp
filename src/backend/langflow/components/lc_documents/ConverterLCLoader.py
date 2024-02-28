@@ -3,26 +3,15 @@ from langchain_core.documents import Document
 
 from langflow import CustomComponent
 from langflow.customer_base_class.document.llamaindexdocument import LLamaIndexDocument
-from langflow.utils.constants import LOADERS_INFO
 
 
 class ConverterLCLoaderComponent(CustomComponent):
-    # output_types: list[str] = ["Document"]
     display_name: str = "Converter Loader"
     description: str = "LangChain Loader"
     beta = True
 
     def build_config(self):
         print("FileLoaderComponent.build_config")
-        loader_options = ["Automatic"] + [loader_info["name"] for loader_info in LOADERS_INFO]
-
-        file_types = []
-        suffixes = []
-
-        for loader_info in LOADERS_INFO:
-            if "allowedTypes" in loader_info:
-                file_types.extend(loader_info["allowedTypes"])
-                suffixes.extend([f".{ext}" for ext in loader_info["allowedTypes"]])
 
         return {
             "code": {"show": False},

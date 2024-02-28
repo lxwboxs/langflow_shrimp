@@ -215,7 +215,7 @@ export const nodeNames: { [char: string]: string } = {
   advanced: "Advanced",
   chat: "Chat",
   embeddings: "Embeddings",
-  documentloaders: "LangchainLoaders",
+  documentloaders: "Loaders",
   vectorstores: "Vector Stores",
   toolkits: "Toolkits",
   wrappers: "Wrappers",
@@ -225,6 +225,8 @@ export const nodeNames: { [char: string]: string } = {
   output_parsers: "Output Parsers",
   custom_components: "Custom",
   aallamahub_document: "llamahub_document",
+  li_embeddings: "li_embeddings",
+  li_llms: "li_llms",
   unknown: "Other",
 };
 

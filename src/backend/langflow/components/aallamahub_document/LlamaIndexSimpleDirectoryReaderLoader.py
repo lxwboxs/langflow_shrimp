@@ -1,13 +1,11 @@
-# from langchain.schema import Document
-from langchain_core.documents import Document
-
 from langflow import CustomComponent
+from langflow.customer_base_class.document.llamaindexdocument import LLamaIndexDocument
 from langflow.utils.constants import LOADERS_INFO
 
 
-class SimpleDirectoryReaderLoaderComponent(CustomComponent):
+class SimpleDirectoryReaderComponent(CustomComponent):
     # output_types: list[str] = ["Document"]
-    display_name: str = "FirstSimpleDirectoryReader Loader"
+    display_name: str = "LlamaIndex SimpleDirectoryReader Loader"
     description: str = "Generic SimpleDirectoryReader Loader"
     beta = True
 
@@ -75,8 +73,9 @@ class SimpleDirectoryReaderLoaderComponent(CustomComponent):
             "code": {"show": False},
         }
 
-    def build(self, file_path: str, loader: str) -> list[Document]:
-        print("FileLoaderComponent.build")
+    def build(self, file_path: str, loader: str) -> list[LLamaIndexDocument]:
+
+        print("FileLoaderComponent.build ")
         print(file_path)
         file_type = file_path.split(".")[-1]
         from llama_index import SimpleDirectoryReader
@@ -84,13 +83,15 @@ class SimpleDirectoryReaderLoaderComponent(CustomComponent):
             input_files=[file_path]
         ).load_data()
 
-        result_documents = []
-
-        for idx in documents:
-            document = Document(
-                page_content=idx.text,
-                metadata={**idx.metadata, 'additional_key': 'additional_value'}
+        print("documents ==============================")
+        print(documents)
+        lidocs = []
+        for doc in documents:
+            lidoc = LLamaIndexDocument(
+                id=doc.doc_id,
+                text=doc.text,
+                metadata=doc.metadata,
             )
-            result_documents.append(document)
+            lidocs.append(lidoc)
 
-        return result_documents
+        return lidocs
