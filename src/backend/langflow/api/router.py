@@ -11,6 +11,7 @@ from langflow.api.v1 import (
     store_router,
     users_router,
     validate_router,
+    converter_openai,
 )
 
 router = APIRouter(
@@ -25,3 +26,4 @@ router.include_router(users_router)
 router.include_router(api_key_router)
 router.include_router(login_router)
 router.include_router(credentials_router)
+router.include_router(converter_openai.router)
